@@ -1,3 +1,4 @@
+
 window.onload = function() {
 	var elements = document.getElementsByTagName('*'),
 		i;
@@ -6,18 +7,30 @@ window.onload = function() {
 			fragment(elements[i], elements[i].getAttribute('data-include'));
 		}
 	}
+    function createActiveXHR() {
+        if (location.protocol == "file:" || !window.XMLHttpRequest) {
+            try {
+              return new ActiveXObject('Microsoft.XMLHTTP');
+            } catch(e) {}
+        } else {
+           try {
+             return new XMLHttpRequest();
+           } catch(e) {}
+        }
+    }
 	function fragment(el, url) {
+
 		var localTest = /^(?:file):/,
-			xmlhttp = new XMLHttpRequest(),
+			xmlhttp = window.ActiveXObject !== undefined ? createActiveXHR() : new XMLHttpRequest(),
 			status = 0;
 
 		xmlhttp.onreadystatechange = function() {
 			/* if we are on a local protocol, and we have response text, we'll assume
- *  				things were sucessful */
+             *  				things were sucessful */
 			if (xmlhttp.readyState == 4) {
 				status = xmlhttp.status;
 			}
-			if (localTest.test(location.href) && xmlhttp.responseText) {
+			if (localTest.test(location.href) && xmlhttp.readyState == 4) {
 				status = 200;
 			}
 			if (xmlhttp.readyState == 4 && status == 200) {
@@ -25,7 +38,7 @@ window.onload = function() {
 			}
 		}
 
-		try { 
+		try {
 			xmlhttp.open("GET", url, true);
 			xmlhttp.send();
 		} catch(err) {
